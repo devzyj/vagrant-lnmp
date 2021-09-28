@@ -2,6 +2,7 @@
 
 - 在 Windows 命令行中进入到项目中，使用 `vagrant up` 启动虚拟机
 - 在虚拟机中进入 `/data/docker` 目录，使用 `docker-compose up -d` 命令启动 LNMP 开发环境。
+- 在浏览器中输入 `http://10.111.222.100` 访问 phpinfo 页面
 
 # Vagrant
 
