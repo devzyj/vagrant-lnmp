@@ -1,0 +1,121 @@
+# 基础镜像
+FROM php:7.3.29-fpm
+
+LABEL MAINTAINER zhangyanjiong@163.com
+LABEL description="基于官方 php 安装了基础扩展的 php-fpm 镜像"
+
+# 复制文件
+#COPY ./* /tmp/
+
+# 拷贝 php.ini 文件
+RUN cp "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini" \
+    # 使用国内镜像 \
+    && sed -i "s@http://deb.debian.org@http://mirrors.aliyun.com@g" /etc/apt/sources.list \
+    && apt-get -y update \
+    \
+    # 安装依赖 \
+    && apt-get install -y \
+        # bz2 \
+        libbz2-dev \
+        # gd \
+        libpng-dev \
+        # gd \
+        libjpeg62-turbo-dev \
+        # gmp \
+#        libgmp-dev \
+        # imap \
+#        libc-client-dev \
+        # imap \
+#        libkrb5-dev \
+        # interbase pdo_firebird \
+#        firebird-dev \
+        # intl \
+        libicu-dev \
+        # ldap \
+#        libldap2-dev \
+        # pdo_odbc \
+#        unixodbc-dev \
+        # pdo_pgsql pgsql \
+        libpq-dev \
+        # pspell \
+#        libpspell-dev \
+        # recode \
+#        librecode-dev \
+        # shmop soap wddx xmlrpc \
+        libxml2-dev \
+        # snmp \
+#        libsnmp-dev \
+        # tidy \
+#        libtidy-dev \
+        # xsl \
+        libxslt-dev \
+        # zip \
+        libzip-dev \
+    \
+    # 配置 PHP Core 扩展 \
+#    && docker-php-ext-configure imap --with-kerberos --with-imap-ssl \
+#    && docker-php-ext-configure pdo_odbc --with-pdo-odbc=unixODBC,/usr/ \
+    \
+    # 安装 PHP Core 扩展 \
+#    && docker-php-ext-install -j$(nproc) \
+#        bcmath bz2 calendar dba exif gd gettext gmp imap interbase intl ldap mysqli opcache pcntl pdo_firebird pdo_mysql pdo_odbc pdo_pgsql pgsql pspell recode \
+#        shmop snmp soap sockets sysvmsg sysvsem sysvshm tidy wddx xmlrpc xsl zend_test zip \
+    && docker-php-ext-install -j$(nproc) bcmath bz2 gd intl mysqli opcache pdo_mysql pdo_pgsql pgsql sockets xmlrpc xsl zip \
+    \
+    # 安装 oci8、pdo_oci 扩展 \
+#    && apt-get -y install alien libaio1 \
+#    && alien -ic /tmp/oracle-instantclient-basic-21.1.0.0.0-1.x86_64.rpm \
+#    && alien -ic /tmp/oracle-instantclient-devel-21.1.0.0.0-1.x86_64.rpm \
+#    && echo /usr/lib/oracle/21/client64/lib/ > /etc/ld.so.conf.d/oracle.conf \
+#    && ldconfig \
+#    && docker-php-ext-configure oci8 --with-oci8=instantclient,/usr/lib/oracle/21/client64/lib/ \
+#    && docker-php-ext-install -j$(nproc) oci8 \
+#    && docker-php-ext-configure pdo_oci --with-pdo-oci=instantclient,/usr/lib/oracle/21/client64/lib/ \
+#    && docker-php-ext-install -j$(nproc) pdo_oci \
+    \
+    # 安装 enchant 扩展（未完成） \
+#    && apt-get install -y libenchant-dev \
+#    && docker-php-ext-install -j$(nproc) enchant \
+    \
+    # 安装 pdo_dblib 扩展（未完成） \
+#    && apt-get install -y freetds-dev \
+#    && ln -fs /usr/lib/x86_64-linux-gnu/libsybdb.a /usr/lib/libsybdb.a \
+#    && docker-php-ext-install -j$(nproc) pdo_dblib \
+    \
+    # 安装 odbc 扩展（未完成） \
+#    && apt-get install -y unixodbc-dev \
+#    && ln -fs /usr/lib/x86_64-linux-gnu/libodbc.a /usr/local/lib/odbclib.a \
+#    && mkdir /usr/local/incl \
+#    && ln -fs /usr/include/sqlext.h /usr/local/incl/sqlext.h \
+#    && cp /usr/include/sqlext.h /usr/local/incl/ \
+#    && docker-php-ext-configure odbc --with-unixODBC=/usr/local/ \
+#    && docker-php-ext-install -j$(nproc) odbc \
+    \
+    # 安装依赖 \
+    && apt-get install -y \
+        # memcached \
+        libmemcached-dev \
+        # uuid \
+#        uuid-dev \
+        # amqp \
+#        librabbitmq-dev \
+    \
+    # 安装 PECL 扩展 \
+#    && pecl install redis mongodb xdebug igbinary msgpack memcached memcache-4.0.5.2 uuid amqp grpc \
+#    && docker-php-ext-enable redis mongodb xdebug igbinary msgpack memcached memcache uuid amqp grpc \
+    && pecl install redis mongodb memcache-4.0.5.2 memcached \
+    && docker-php-ext-enable redis mongodb memcache memcached \
+    \
+    # 清除安装缓存 \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* \
+    && rm -rf /tmp/*
+    
+# 工作目录
+WORKDIR /var/www/html
+
+# 服务端口
+EXPOSE 9000
+
+# 默认的启动命令
+CMD ["php-fpm"]

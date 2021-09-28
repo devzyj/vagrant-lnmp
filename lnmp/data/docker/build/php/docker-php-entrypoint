@@ -1,0 +1,14 @@
+#!/bin/sh
+
+# 修改目录权限
+chown -f www-data:www-data /var/log/php-fpm
+chown -f www-data:www-data /data/web
+
+set -e
+
+# first arg is `-f` or `--some-option`
+if [ "${1#-}" != "$1" ]; then
+	set -- php-fpm "$@"
+fi
+
+exec "$@"
