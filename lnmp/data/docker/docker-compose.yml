@@ -68,9 +68,9 @@ services:
             - /data/docker/volumes/mysql-log:/var/log/mysql
         networks:
             - web-server-network
-        #command:
-        #    # 同步 Windows 目录时的必须参数
-        #    - --innodb-use-native-aio=0
+        command:
+            # 同步 Windows 目录时的必须参数
+            - --innodb-use-native-aio=0
     redis:
         build: 
             context: ./build/redis
