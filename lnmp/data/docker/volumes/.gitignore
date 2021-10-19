@@ -1,0 +1,6 @@
+mysql-data
+mysql-log
+nginx-log
+php-7.3-fpm-log
+redis-data
+redis-log

@@ -60,3 +60,6 @@ long-query-time=3
 # Query log
 #general-log=1
 #general-log-file=/var/log/mysql/mysql.log
+
+# Set SQL Mode
+sql_mode=""

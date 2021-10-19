@@ -1,10 +1,29 @@
 version: "3.3"
 services:
-    nginx-server:
+    php-7.3-fpm:
+        build: 
+            context: ./build/php-7.3-fpm
+            dockerfile: Dockerfile
+        container_name: "php-7.3-fpm"
+        restart: always
+        volumes:
+            # 时区时间
+            - /etc/timezone:/etc/timezone:ro
+            - /etc/localtime:/etc/localtime:ro
+            # 配置文件
+            - /data/docker/volumes/php-7.3-fpm-conf/php.ini:/usr/local/etc/php/php.ini:ro
+            - /data/docker/volumes/php-7.3-fpm-conf/www.conf:/usr/local/etc/php-fpm.d/www.conf:ro
+            # 日志目录
+            - /data/docker/volumes/php-7.3-fpm-log:/var/log/php-fpm
+            # 网站目录
+            - /data/web:/data/web
+        networks:
+            - web-server-network
+    nginx:
         build: 
             context: ./build/nginx
             dockerfile: Dockerfile
-        container_name: "nginx-server"
+        container_name: "nginx"
         restart: always
         ports:
             - "80:80"
@@ -14,40 +33,21 @@ services:
             - /etc/timezone:/etc/timezone:ro
             - /etc/localtime:/etc/localtime:ro
             # 配置文件
-            - /data/docker/volumes/nginx-server-conf/nginx.conf:/etc/nginx/nginx.conf:ro
-            - /data/docker/volumes/nginx-server-conf/conf.d:/etc/nginx/conf.d:ro
+            - /data/docker/volumes/nginx-conf/nginx.conf:/etc/nginx/nginx.conf:ro
+            - /data/docker/volumes/nginx-conf/conf.d:/etc/nginx/conf.d:ro
             # 日志目录
-            - nginx-server-log:/var/log/nginx
+            - /data/docker/volumes/nginx-log:/var/log/nginx
             # 网站目录
             - /data/web:/data/web
         networks:
             - web-server-network
         depends_on:
-            - php-fpm-server
-    php-fpm-server:
-        build: 
-            context: ./build/php
-            dockerfile: Dockerfile
-        container_name: "php-fpm-server"
-        restart: always
-        volumes:
-            # 时区时间
-            - /etc/timezone:/etc/timezone:ro
-            - /etc/localtime:/etc/localtime:ro
-            # 配置文件
-            - /data/docker/volumes/php-fpm-server-conf/php.ini:/usr/local/etc/php/php.ini:ro
-            - /data/docker/volumes/php-fpm-server-conf/www.conf:/usr/local/etc/php-fpm.d/www.conf:ro
-            # 日志目录
-            - php-fpm-server-log:/var/log/php-fpm
-            # 网站目录
-            - /data/web:/data/web
-        networks:
-            - web-server-network
-    mysql-server:
+            - php-7.3-fpm
+    mysql:
         build: 
             context: ./build/mysql
             dockerfile: Dockerfile
-        container_name: "mysql-server"
+        container_name: "mysql"
         restart: always
         ports:
             - "3306:3306"
@@ -60,19 +60,22 @@ services:
             - /etc/timezone:/etc/timezone:ro
             - /etc/localtime:/etc/localtime:ro
             # 配置文件
-            - /data/docker/volumes/mysql-server-conf/mysql.cnf:/etc/mysql/conf.d/mysql.cnf:ro
-            - /data/docker/volumes/mysql-server-conf/mysqld.cnf:/etc/mysql/mysql.conf.d/mysqld.cnf:ro
+            - /data/docker/volumes/mysql-conf/mysql.cnf:/etc/mysql/conf.d/mysql.cnf:ro
+            - /data/docker/volumes/mysql-conf/mysqld.cnf:/etc/mysql/mysql.conf.d/mysqld.cnf:ro
             # 数据存储目录
-            - mysql-server-data:/var/lib/mysql
+            - /data/docker/volumes/mysql-data:/var/lib/mysql
             # 日志目录
-            - mysql-server-log:/var/log/mysql
+            - /data/docker/volumes/mysql-log:/var/log/mysql
         networks:
             - web-server-network
-    redis-server:
+        #command:
+        #    # 同步 Windows 目录时的必须参数
+        #    - --innodb-use-native-aio=0
+    redis:
         build: 
             context: ./build/redis
             dockerfile: Dockerfile
-        container_name: "redis-server"
+        container_name: "redis"
         restart: always
         ports:
             - "6379:6379"
@@ -81,26 +84,13 @@ services:
             - /etc/timezone:/etc/timezone:ro
             - /etc/localtime:/etc/localtime:ro
             # 配置文件
-            - /data/docker/volumes/redis-server-conf/redis.conf:/usr/local/etc/redis/redis.conf:ro
+            - /data/docker/volumes/redis-conf/redis.conf:/usr/local/etc/redis/redis.conf:ro
             # 数据存储目录
-            - redis-server-data:/data
+            - /data/docker/volumes/redis-data:/data
             # 日志目录
-            - redis-server-log:/var/log/redis
+            - /data/docker/volumes/redis-log:/var/log/redis
         networks:
             - web-server-network
-volumes:
-    nginx-server-log:
-        driver: local
-    php-fpm-server-log:
-        driver: local
-    mysql-server-data:
-        driver: local
-    mysql-server-log:
-        driver: local
-    redis-server-data:
-        driver: local
-    redis-server-log:
-        driver: local
 networks:
     web-server-network:
         driver: "bridge"
