@@ -1,5 +1,7 @@
 #!/bin/bash
 
+sudo echo "Initialization Start"
+
 # 设置系统时区
 sudo echo "Set Timezone"
 sudo timedatectl set-timezone Asia/Shanghai
@@ -30,8 +32,16 @@ sudo systemctl start docker
 sudo groupadd docker
 sudo usermod -aG docker $USER
 
-# 开启 Docker 用户隔离功能
+# 开启 Docker 用户隔离功能，使用镜像加速
 sudo echo -e "{\n\
+    \"registry-mirrors\": [\n\
+        \"https://mirror.baidubce.com\",\n\
+        \"https://hub-mirror.c.163.com\",\n\
+        \"https://registry.hub.docker.com\"\n\
+    ],\n\
     \"userns-remap\": \"default\"\n\
 }" > /etc/docker/daemon.json
+sudo systemctl daemon-reload
 sudo systemctl restart docker
+
+sudo echo "Initialization End"
