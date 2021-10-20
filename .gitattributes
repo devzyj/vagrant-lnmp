@@ -9,5 +9,4 @@
 .gitignore export-ignore
 README.md export-ignore
 LICENSE export-ignore
-/lnmp/lnmp-init.sh export-ignore
 /lnmp/data/docker/dockerfile export-ignore
